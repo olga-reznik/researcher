@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load static %}
+{% load poll_extras %}
+{% block content %}
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.0/chart.min.js" integrity="sha512-asxKqQghC1oBShyhiBwA+YgotaSYKxGP1rcSYTDrB0U6DxwlJjU59B67U8+5/++uFjcuVM8Hh5cokLjZlhm3Vg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <div class="container">
+
+        <h1>Poll {{ survey.name }} results</h1>
+
+        <a href="{% url 'polls:questionnaires_list' survey.id %}">Questionnaires</a>
+        <div class="bg-light p-md-3 shadow border my-4">
+            <form action="{% url 'polls:survey_result' survey.id  %}" method="post" >
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col">
+                        <fieldset>
+                            <legend>Dimensions</legend>
+                            <label for="selectD1">Dimension 1</label>
+                            <select id="selectD1" name="d1" class="form-control form-control-sm">
+                                {% for question in question_list %}
+                                <option  value="{{ question.q_index }}" {% if d1_key ==  question.q_index|stringformat:"i" %}selected{% endif %}>{{ question.question_text }}</a></option>
+                                {% endfor %}
+                            </select>
+                            <label for="selectD2">Dimension 2</label>
+                            <select name="d2" class="form-control form-control-sm">
+                                {% for question in question_list %}
+                                <option value="{{ question.q_index }}" {% if d2_key ==  question.q_index|stringformat:"i" %}selected{% endif %} >{{ question.question_text }}</a></option>
+                                {% endfor %}
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col">
+                        <fieldset >
+                            <legend>Data type</legend>
+
+                            <input type="radio" name="data_type" value="percent" {% if data_type == 'percent' %}checked{% endif %}> Percent
+                            <input type="radio" name="data_type" value="number"  {% if data_type == 'number' %}checked{% endif %}> Number
+
+                        </fieldset>
+                    </div>
+                    <div class="col">
+                        <fieldset >
+                            <legend>View</legend>
+
+                            <input type="radio" name="view_type" value="line"  {% if view_type == 'line' %}checked{% endif %}> Line
+                            <input type="radio" name="view_type" value="bar"   {% if view_type == 'bar' %}checked{% endif %}> Bar
+                            <input type="radio" name="view_type" value="table" {% if view_type == 'table' %}checked{% endif %}> Table
+
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="row mt-3" >
+                    <fieldset>
+                        <legend>Filters</legend>
+                        {% for question in question_list %}
+
+                        <label for="selectQ{{ question.q_index }}">{{ question.question_text }}</label>
+                        <select  id="selectQ{{ question.q_index }}" name="filter_q_{{ question.q_index }}" class="form-control form-control-sm">
+                            <option value="total" >Total</option>
+                            {% for choice in question.choices_set.all %}
+                                <option value="{{ choice.choice_key }}"  >{{ choice.choice_text }}</option>
+                            {% endfor %}
+                        </select>
+                        {% endfor %}
+                    </fieldset>
+                </div>
+                <br>
+
+                <input type="hidden" name="survey" value="{{ survey.id }}">
+                <input class="btn btn-primary" type="submit" value="Show">
+
+
+            </form>
+        </div>
+
+        {% if view_type == 'table' %}
+        <table class="table table-striped" >
+            <thead>
+                <tr>
+                    <th></th>
+                    {% for label in h_axis_labels %}
+                    <th >{{ label }}</th>
+                    {% endfor %}
+                 </tr>
+            </thead>
+            <tbody>
+                {% for row in Data %}
+                <tr>
+                <th>{{ v_axis_labels|index:forloop.counter0 }}</th>
+
+
+                {% for cell in row %}
+                    <td>{{ cell }}</td>
+                {% endfor %}
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else  %}
+        <div class="my-5">
+            <canvas id="myChart" ></canvas>
+        </div>
+        <script>
+        {% if view_type == 'line' %}
+        var view_type = 'line';
+        {% elif view_type == 'bar' %}
+        var view_type = 'bar';
+        {% else  %}
+        var view_type = 'bar';
+        {% endif %}
+
+
+
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: view_type,
+            data: {
+                labels: {{ h_axis_labels|safe }},
+                datasets: [
+                {% for row in Data %}
+                {
+                    label: '{{ v_axis_labels|index:forloop.counter0 }}',
+                    data: {{row}},
+                },
+                {% endfor %}
+                ]
+            },
+            options: {}
+        });
+        {% if data_type == 'percent' %}
+        myChart.options.scales = {
+                    y: {
+                        min: 0,
+                        max: 100
+                    }
+                }
+        myChart.update();
+
+        {% endif %}
+        </script>
+        {% endif %}
+    </div>
+{% endblock %}

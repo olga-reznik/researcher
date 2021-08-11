@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+
+<h1> Welcome {{ surveys.name }}</h1>
+
+<form action="{% url 'polls:vote' %}" method="post">
+{% csrf_token %}
+
+   <input type="hidden" name="questionnaire" value="{{ questionnaire.id }}">
+   <input type="hidden" name="status" value="start">
+   <input type="hidden" name="survey" value="{{ survey.id }}">
+
+<input type="submit" value="Start">
+</form>
+{% endblock %}
