@@ -1,4 +1,4 @@
 django
 gunicorn
 django-heroku
-debug_toolbar==3.2.2
+django-debug-toolbar
