@@ -1,21 +1,32 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<form action="{% url 'polls:vote' %}" method="post">
-{% csrf_token %}
-<fieldset>
-    <legend><h1>{{ question.question_text }}</h1></legend>
-    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-    {% for choice in question.choices_set.all %}
-        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
-    {% endfor %}
-    <input type="hidden" name="questionnaire" value="{{ questionnaire.id }}">
-    <input type="hidden" name="survey" value="{{ survey.id }}">
-    <input type="hidden" name="question" value="{{ question.id }}">
-    <input type="hidden" name="status" value="next">
-</fieldset>
-<input type="submit" value="Save">
-</form>
+<div class="container px-4 py-5 " id="custom-cards">
+    <h1 class="display-5 fw-bold text-center">{{ question.question_text }}</h1>
+
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center my-4">
+
+        <form action="{% url 'polls:vote' %}" method="post" >
+         {% csrf_token %}
+         {% for choice in q_choices %}
+         <div class="form-check text-left">
+          <input class="form-check-input" type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" >
+          <label class="form-check-label" for="choice{{ forloop.counter }}">
+            {{ choice.choice_text }}
+          </label>
+         </div>
+         {% endfor %}
+
+
+         <input type="hidden" name="questionnaire" value="{{ questionnaire.id }}">
+         <input type="hidden" name="survey" value="{{ survey.id }}">
+         <input type="hidden" name="question" value="{{ question.id }}">
+         <input type="hidden" name="status" value="next">
+         <input type="submit" class="btn btn-primary btn-lg px-4 my-4" value="Save">
+
+        </form>
+    </div>
+
+</div>
 
 {% endblock %}

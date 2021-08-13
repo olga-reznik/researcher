@@ -2,7 +2,10 @@ from django.db import models
 
 class Surveys(models.Model):
     name = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
+    create_date = models.DateTimeField('date create')
+    welcome_header_text = models.CharField(max_length=200, null=True)
+    welcome_description_text = models.CharField(max_length=400, null=True)
+    end_text = models.CharField(max_length=200, null=True)
 
     def __str__(self):
         return self.name
@@ -10,7 +13,6 @@ class Surveys(models.Model):
 class Questions(models.Model):
     survey = models.ForeignKey(Surveys, on_delete=models.CASCADE)
     question_text = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
     q_index = models.IntegerField()
     sort_order = models.IntegerField()
 
@@ -34,7 +36,8 @@ class Choices(models.Model):
 
 class Questionnaires(models.Model):
     survey = models.ForeignKey(Surveys, on_delete=models.CASCADE)
-    pub_date = models.DateTimeField('date published')
+    create_date = models.DateTimeField('date create')
+    is_test = models.BooleanField(default=0)
     q1 = models.CharField(null=True, max_length=200)
     q2 = models.CharField(null=True, max_length=200)
     q3 = models.CharField(null=True, max_length=200)

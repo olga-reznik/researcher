@@ -14,8 +14,8 @@ class ChoicesInline(admin.TabularInline):
 
 
 class QuestionsAdmin(admin.ModelAdmin):
-    list_display = ('survey', 'question_text', 'q_index', 'sort_order' )
-    list_filter = ['survey', 'question_text', 'q_index', 'sort_order']
+    list_display = ('question_text', 'q_index', 'sort_order' )
+    list_filter = ['survey']
     search_fields = ['survey', 'question_text', 'q_index', 'sort_order']
     inlines = [ChoicesInline]
 
@@ -28,9 +28,9 @@ class QuestionsInline(admin.TabularInline):
 
 
 class SurveysAdmin(admin.ModelAdmin):
-    list_display = ('name', 'pub_date')
-    list_filter = ['name', 'pub_date']
-    search_fields = ['name', 'pub_date']
+    list_display = ('name', 'create_date')
+    list_filter = ['name', 'create_date']
+    search_fields = ['name', 'create_date']
     inlines = [QuestionsInline]
 
 admin.site.register(Surveys, SurveysAdmin)

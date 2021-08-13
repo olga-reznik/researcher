@@ -89,7 +89,7 @@ def survey_start(request, survey_id):
 
     #При начале опроса создаем анкету
     # TODO: назначить анкете статус "Опрос начат"
-    questionnaire = Questionnaires(pub_date=timezone.now(), survey_id=survey_id)
+    questionnaire = Questionnaires(create_date=timezone.now(), survey_id=survey_id)
     questionnaire.save()
 
     context = {
@@ -111,15 +111,18 @@ def vote(request):
     if status == "start":
         #Находим первый вопрос и отображаем
         first_question = Questions.objects.filter(survey_id=survey.id).order_by('sort_order').first()
+        q_choices = Choices.objects.filter(question=first_question.id).order_by('sort_order')
 
         context = {
             'question': first_question,
+            'q_choices': q_choices,
             'questionnaire': questionnaire,
             'survey': survey
         }
         return render(request, 'polls/question.html', context)
     else:
         question = Questions.objects.get(pk=request.POST['question'])
+
         # Сохраняем данные в анкету и переходим к следующему вопросу
         selected_choice = question.choices_set.get(pk=request.POST['choice'])
 
@@ -130,10 +133,14 @@ def vote(request):
         questionnaire.save()
         next_question = Questions.objects.filter(survey_id=survey.id, q_index__gt=question.q_index).order_by('sort_order').first()
 
+
         if next_question:
             #есть вопросы, отображаем
+            q_choices = Choices.objects.filter(question=next_question.id).order_by('sort_order')
+
             context = {
-                "question": next_question,
+                'question': next_question,
+                'q_choices': q_choices,
                 'questionnaire': questionnaire,
                 'survey': survey
             }
@@ -141,7 +148,9 @@ def vote(request):
         else:
             #вопросов больше нет
             # TODO: перевести анкету в статус "Опрос пройден"
-            context = {}
+            context = {
+                'survey': survey
+            }
             return render(request, 'polls/end.html', context)
 
 
