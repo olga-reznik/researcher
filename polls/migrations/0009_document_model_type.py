@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='document',
             name='model_type',
-            field=models.CharField(choices=[('ques', 'Questions'), ('choi', 'Choices')], default=django.utils.timezone.now, max_length=4),
+            field=models.CharField(choices=[('ques', 'Questions'), ('choi', 'Choices')], default='', max_length=4),
             preserve_default=False,
         ),
     ]
