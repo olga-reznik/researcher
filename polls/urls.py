@@ -24,6 +24,6 @@ urlpatterns = [
 
     path('question/vote/', views.vote, name='vote'),
 
-
+    path('upload_files/', views.upload_files, name='upload_files'),
 
 ]

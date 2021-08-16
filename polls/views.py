@@ -4,8 +4,9 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.db import connection
-from .forms import CreateSurveyForm
-import logging
+from .forms import CreateSurveyForm, DocumentForm
+from django.core.files.storage import FileSystemStorage
+import csv
 
 from .models import Surveys, Questions, Choices, Questionnaires
 
@@ -317,3 +318,94 @@ ON t_base.q"""+d1_key+""" = t_number.q"""+d1_key+""" """
     }
 
     return render(request, 'polls/survey_results.html', context)
+
+def upload_files(request):
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        error_message = ""
+        wrong_survey_ids = set([])
+        wrong_question_ids = set([])
+
+        if form.is_valid():
+            doc = form.save()
+            file = doc.document
+            file.open(mode='r')
+            reader = csv.reader(file, delimiter=';')
+            iter = 0
+
+            if doc.model_type == 'quest':
+                for row in reader:
+                    iter += 1
+                    if iter == 1:
+                        if row[0] != 'survey_id':
+                            error_message += "First column must be survey_id"
+                        if row[1] != 'question_test':
+                            error_message += "Second column must be question_test"
+                        if row[2] != 'q_index':
+                            error_message += "Third column must be q_index"
+                        if row[3] != 'sort_order':
+                            error_message += "Fourth column must be sort_order"
+                        if  error_message != "":
+                            break
+                    else:
+                        try:
+                            survey = Surveys.objects.get(id=int(row[0]))
+                        except DoesNotExist:
+                            wrong_survey_ids.add(row[0])
+                            continue
+
+                        question = Questions.objects.create(
+                            survey=survey,
+                            question_text=row[1],
+                            q_index=row[2],
+                            sort_order=int(row[3]),
+                        )
+
+
+
+            elif doc.model_type == 'choi':
+                for row in reader:
+                    iter += 1
+                    if iter == 1:
+                        if row[0] != 'question_id':
+                            error_message += "First column must be question_id"
+                        if row[1] != 'choice_text':
+                            error_message += "Second column must be choice_text"
+                        if row[2] != 'choice_key':
+                            error_message += "Third column must be choice_key"
+                        if row[3] != 'sort_order':
+                            error_message += "Fourth column must be sort_order"
+                        if  error_message != "":
+                            break
+                    else:
+                        try:
+                            question = Questions.objects.get(id=int(row[0]))
+                        except DoesNotExist:
+                            wrong_question_ids.add(row[0])
+                            continue
+
+                        choice = Choices.objects.create(
+                            question=question,
+                            choice_text=row[1],
+                            choice_key=row[2],
+                            sort_order=int(row[3]),
+                        )
+
+
+
+
+            form = DocumentForm()
+            if len(wrong_survey_ids) != 0 :
+                error_message = "Surveys with ids " + wrong_survey_ids + " do not exist. "
+            if len(wrong_question_ids) != 0 :
+                error_message = "Quesions with ids " + wrong_question_ids + " do not exist. "
+            return render(request, 'polls/upload_files.html', {
+                'form': form,
+                'error_message': error_message,
+            })
+    else:
+        form = DocumentForm()
+    return render(request, 'polls/upload_files.html', {
+        'form': form
+    })
+

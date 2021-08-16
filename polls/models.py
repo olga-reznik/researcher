@@ -61,3 +61,16 @@ class Questionnaires(models.Model):
 
     def get_fields(self):
         return [(field.name, field.value_to_string(self)) for field in Questionnaires._meta.fields]
+
+class Document(models.Model):
+    MODEL_TYPE_FILE_CHOICES = [
+        ('ques', 'Questions'),
+        ('choi', 'Choices'),
+    ]
+    description = models.CharField(max_length=255, blank=True)
+    model_type = models.CharField(
+        max_length=4,
+        choices=MODEL_TYPE_FILE_CHOICES,
+    )
+    document = models.FileField(upload_to='documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
