@@ -10,27 +10,64 @@
 <body>
 {% block header %}
 <header>
+    {% block navbar %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
       <a class="navbar-brand px-5" href="/">Researcher</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
+        {% block navbar_links %}
         <ul class="navbar-nav">
-          <li class="nav-item active">
-            <a class="nav-link" href="{% url 'polls:edit_survey_list' %}">Edit Surveys</a>
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="testNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Edit Surveys
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="testNavbarDropdown">
+                <li><a class="dropdown-item" href="{% url 'polls:survey_new' %}">Create new survey</a></li>
+                <li><hr class="dropdown-divider"></li>
+                {% for survey in survey_list %}
+                <li><a class="dropdown-item" href="{% url 'polls:survey_edit' survey.id %}">{{ survey.name }}</a></li>
+
+                {% endfor %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'polls:edit_survey_list' %}">List of Surveys</a></li>
+              </ul>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'polls:start_survey_list' %}">Test surveys</a>
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="testNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Test surveys
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="testNavbarDropdown">
+                {% for survey in survey_list %}
+                <li><a class="dropdown-item" href="{% url 'polls:survey_start' survey.id %}">{{ survey.name }}</a></li>
+
+                {% endfor %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'polls:start_survey_list' %}">List of Surveys</a></li>
+              </ul>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'polls:result_survey_list' %}">Results</a>
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="resultNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Results
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="resultNavbarDropdown">
+                {% for survey in survey_list %}
+                <li><a class="dropdown-item" href="{% url 'polls:survey_result' survey.id %}">{{ survey.name }}</a></li>
+
+                {% endfor %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'polls:result_survey_list' %}">List of Surveys</a></li>
+              </ul>
           </li>
+
         </ul>
+        {% endblock %}
       </div>
     </nav>
     <div class="collapse navbar-collapse" id="navbarNav">
-
+     {% endblock %}
 </header>
 {% endblock %}
 
