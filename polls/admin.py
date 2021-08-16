@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Surveys, Questions, Choices, Questionnaires
+from .models import Surveys, Questions, Choices, Questionnaires, Document
 
 #admin.site.register(Surveys)
 #admin.site.register(Questions)
@@ -39,3 +39,4 @@ admin.site.register(Surveys, SurveysAdmin)
 
 
 admin.site.register(Questionnaires)
+admin.site.register(Document)

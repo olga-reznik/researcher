@@ -71,6 +71,8 @@ class Document(models.Model):
     model_type = models.CharField(
         max_length=4,
         choices=MODEL_TYPE_FILE_CHOICES,
+        default='',
+        null=True,
     )
     document = models.FileField(upload_to='documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
