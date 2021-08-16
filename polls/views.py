@@ -5,6 +5,7 @@ from django.views import generic
 from django.utils import timezone
 from django.db import connection
 from .forms import CreateSurveyForm
+import logging
 
 from .models import Surveys, Questions, Choices, Questionnaires
 
@@ -171,17 +172,23 @@ def survey_result(request, survey_id):
         view_type = request.POST.get('view_type')
         data_type = request.POST.get('data_type')
 
+
         # Filters
         for post_key, post_value in request.POST.items():
-            r_res = re.findall(r'filter_q_(\d*)', post_key)
-            if r_res:
-                #Нашли фильтр
-                q_number = r_res[0]
-                filters_values[q_number] = post_value
-                #Фильтр со значением =  total то же самое, что не использование фильтра
-                if post_value != 'total':
-                    use_filters = True
-                    filters_query_str += """ and q"""+str(q_number)+""" in ('""" + str(post_value) + """') """
+            # Фильтр со значением =  total то же самое, что не использование фильтра
+            if post_value != 'total':
+                #Проверяем, что этот параметр - фильтр
+                r_res = re.findall(r'filter_q_(\d*)', post_key)
+                if r_res:
+                    #Нашли фильтр
+                    q_number = r_res[0]
+
+                    values = request.POST.getlist(post_key)
+                    filters_values[q_number] = values
+
+
+        for q_number in filters_values:
+            filters_query_str += """ and q"""+str(q_number)+""" in (""" + ','.join("'"+e+"'" for e in filters_values[q_number]) + """) """
 
 
 
@@ -207,8 +214,8 @@ def survey_result(request, survey_id):
     where survey_id="""+str(survey_id)+"""
     and q"""+d1_key+""" is not null and q"""+d2_key+""" is not null """
 
-    if use_filters:
-        query_number += filters_query_str
+
+    query_number += filters_query_str
 
     query_number += """ group by  q"""+d1_key+""", q"""+d2_key+""" 
                  """
@@ -226,8 +233,8 @@ select count(id) number,
    and q"""+d1_key+""" is not null
    and q"""+d2_key+""" is not null """
 
-    if use_filters:
-        query_percent += filters_query_str
+
+    query_percent += filters_query_str
 
     query_percent += """ group by q"""+d1_key+""",
        q"""+d2_key+"""
@@ -243,8 +250,7 @@ select count(id) base,
    and q"""+d1_key+""" is not null
    and q"""+d2_key+""" is not null """
 
-    if use_filters:
-        query_percent += filters_query_str
+    query_percent += filters_query_str
 
     query_percent += """group by q"""+d1_key+"""
  ) ) t_base

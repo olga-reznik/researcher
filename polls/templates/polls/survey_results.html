@@ -4,7 +4,6 @@
 {% block navbar_links %}{% endblock %}
 {% block content %}
 
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.0/chart.min.js" integrity="sha512-asxKqQghC1oBShyhiBwA+YgotaSYKxGP1rcSYTDrB0U6DxwlJjU59B67U8+5/++uFjcuVM8Hh5cokLjZlhm3Vg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <div class="container">
@@ -12,6 +11,8 @@
         <h1>Poll {{ survey.name }} results</h1>
 
         <a href="{% url 'polls:questionnaires_list' survey.id %}">Questionnaires</a>
+
+
         <div class="bg-light p-md-3 shadow border my-4">
             <form action="{% url 'polls:survey_result' survey.id  %}" method="post" >
                 {% csrf_token %}
@@ -59,7 +60,7 @@
                         {% for question in question_list %}
 
                         <label for="selectQ{{ question.q_index }}">{{ question.question_text }}</label>
-                        <select  id="selectQ{{ question.q_index }}" name="filter_q_{{ question.q_index }}" class="form-control form-control-sm">
+                        <select  id="selectQ{{ question.q_index }}" name="filter_q_{{ question.q_index }}" class="form-select form-select-sm" multiple>
                             <option value="total" >Total</option>
                             {% for choice in question.choices_set.all %}
                                 <option value="{{ choice.choice_key }}"  >{{ choice.choice_text }}</option>
@@ -145,5 +146,7 @@
         {% endif %}
         </script>
         {% endif %}
+
     </div>
+
 {% endblock %}
